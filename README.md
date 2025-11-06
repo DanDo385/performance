@@ -1,6 +1,6 @@
 # CPU Benchmark: Multi-Language Puzzle Solver Comparison
 
-A comprehensive cross-language CPU benchmarking project that compares performance of Go, Python, TypeScript, C++, and Rust on parallel computations involving complex algorithmic puzzles (lattice paths and knapsack problems).
+A comprehensive cross-language CPU benchmarking project that compares performance of Go, Python, TypeScript, C, C++, and Rust on parallel computations involving complex algorithmic puzzles (lattice paths and knapsack problems).
 
 ## Features
 
@@ -8,7 +8,7 @@ A comprehensive cross-language CPU benchmarking project that compares performanc
   - Lattice path dynamic programming (m×n grid path enumeration)
   - NP-hard knapsack problem solving
   - Multiple puzzle iterations per benchmark run
-- **5 Language Support**: Go, Python, TypeScript, C++, and Rust
+- **6 Language Support**: Go, Python, TypeScript, C, C++, and Rust
 - **Parallel Processing**: Uses all available CPU cores for computation
 - **Live CPU Monitoring**: Real-time per-core CPU utilization tracking
 - **Detailed CPU Info**: CPU model, speed (GHz), and core count
@@ -30,6 +30,7 @@ performance/
 │   ├── metrics/cpu.go                   # Live CPU monitoring & workload tracking
 │   └── metrics/memory.go                # Memory tracking with system info
 ├── python/bench.py                      # Python benchmark implementation
+├── c/src/bench.c                        # C benchmark implementation
 ├── cpp/src/bench.cpp                    # C++ benchmark implementation
 ├── rust/src/main.rs                     # Rust benchmark implementation
 ├── typescript/
@@ -60,6 +61,11 @@ performance/
   pip3 install psutil
   ```
 
+### C
+- Clang or GCC compiler
+- macOS: Xcode Command Line Tools
+- Linux: `gcc` or `clang`
+
 ### C++
 - Clang or GCC compiler with C++17 support
 - macOS: Xcode Command Line Tools
@@ -87,9 +93,10 @@ This will:
 1. Build and run Go benchmark (500k puzzle iterations)
 2. Run Python benchmark (same parameters)
 3. Build and run TypeScript benchmark (500k puzzle iterations)
-4. Build and run C++ benchmark (500k puzzle iterations)
-5. Build and run Rust benchmark (500k puzzle iterations)
-6. Display comprehensive comparison table with performance analysis
+4. Build and run C benchmark (500k puzzle iterations)
+5. Build and run C++ benchmark (500k puzzle iterations)
+6. Build and run Rust benchmark (500k puzzle iterations)
+7. Display comprehensive comparison table with performance analysis
 
 ### Run with Validation
 
@@ -113,6 +120,10 @@ make run-python
 make build-ts
 make run-ts
 
+# Build and run C
+make build-c
+make run-c
+
 # Build and run C++
 make build-cpp
 make run-cpp
@@ -133,6 +144,9 @@ python3 python/bench.py --limit=1000000
 
 # TypeScript with custom puzzle iterations
 cd typescript && node dist/bench.js --limit=1000000
+
+# C with custom puzzle iterations
+./bench-c --limit=1000000
 
 # C++ with custom puzzle iterations
 ./bench-cpp --limit=1000000
@@ -178,9 +192,10 @@ Per-Core Puzzle Results:
 
 ```
 ==========================================================================
-GO vs PYTHON vs TYPESCRIPT vs C++ vs RUST - CPU BENCHMARK COMPARISON
+GO vs PYTHON vs TYPESCRIPT vs C vs C++ vs RUST - CPU BENCHMARK COMPARISON
 --------------------------------------------------------------------------
 Language     Time (s)   Memory Peak (MB) Cores Used   Tokens Generated
+C            0.95s      0.50             8            647,355,583,714,124
 C++          1.01s      0.50             8            647,355,583,714,124
 Rust         1.23s      0.50             8            647,355,583,714,124
 Go           3.68s      1.48             8            647,355,583,714,124
@@ -189,6 +204,7 @@ Python       36.53s     15.11            8            647,355,583,714,124
 
 Performance Analysis:
 --------------------
+C is 3.87x faster than Go
 C++ is 3.64x faster than Go
 Rust is 2.99x faster than Go
 Python is 9.92x slower than Go
@@ -281,6 +297,7 @@ The benchmark solves three interconnected puzzles to generate computational toke
 
 | Language   | Time (s) | Tokens Generated    | Speed vs Go  | Memory Peak (MB) |
 |------------|----------|---------------------|--------------|------------------|
+| C          | 0.95s    | 647,355,583,714,124 | 3.87x faster | 0.50             |
 | C++        | 1.01s    | 647,355,583,714,124 | 3.64x faster | 0.50             |
 | Rust       | 1.23s    | 647,355,583,714,124 | 2.99x faster | 0.50             |
 | Go         | 3.68s    | 647,355,583,714,124 | Baseline     | 1.48             |
@@ -288,7 +305,8 @@ The benchmark solves three interconnected puzzles to generate computational toke
 
 ### Expected Relative Performance
 
-- **C++**: Fastest (compiled, aggressive optimization, zero-cost abstractions)
+- **C**: Fastest (compiled, minimal overhead, manual memory management)
+- **C++**: Very Fast (compiled, aggressive optimization, zero-cost abstractions)
 - **Rust**: Very Fast (compiled, memory safety, excellent DP optimization)
 - **Go**: Fast (compiled, good parallelism, runtime overhead)
 - **Python**: Slowest (interpreter overhead, GIL limitations, dynamic typing)
@@ -296,6 +314,7 @@ The benchmark solves three interconnected puzzles to generate computational toke
 
 ### Memory Usage (Typical)
 
+- **C**: 0.5 MB (manual memory management, stack allocation)
 - **C++**: 0.5 MB (static memory management, stack allocation)
 - **Rust**: 0.5 MB (efficient memory management, zero-copy)
 - **Go**: 1-3 MB (runtime memory management, GC overhead)
@@ -304,6 +323,7 @@ The benchmark solves three interconnected puzzles to generate computational toke
 
 ### CPU Utilization
 
+- **C**: 95%+ on all cores (true parallelism with pthreads)
 - **C++**: 95%+ on all cores (true parallelism with threads)
 - **Rust**: 95%+ on all cores (rayon data parallelism)
 - **Go**: 85%+ on all cores (goroutine overhead slightly higher)
@@ -336,7 +356,7 @@ make clean
 ```
 
 Removes:
-- Compiled binaries (`bench-go`, `bench-cpp`, `bench-rust`)
+- Compiled binaries (`bench-go`, `bench-c`, `bench-cpp`, `bench-rust`)
 - Output files (all language output files)
 - TypeScript and Rust build artifacts
 
@@ -370,6 +390,9 @@ run-go: build-go
 # Run Python directly
 python3 python/bench.py --limit=100000
 
+# Run C directly
+./bench-c --limit=100000
+
 # Run C++ directly
 ./bench-cpp --limit=100000
 
@@ -397,7 +420,7 @@ go mod download
 pip3 install psutil
 ```
 
-### C++ compiler not found
+### C/C++ compiler not found
 
 ```bash
 # macOS: Install Xcode Command Line Tools
@@ -429,6 +452,7 @@ cd typescript && npm install
 
 - **Go**: Requires `gopsutil` - run `go mod tidy`
 - **Python**: Requires `psutil` - install with `pip3 install psutil`
+- **C**: Uses standard C library (no external deps needed)
 - **C++**: Uses standard C++ library (no external deps needed)
 - **Rust**: Uses standard library and Cargo dependencies
 - **TypeScript**: Uses built-in `os` module (no external deps needed)

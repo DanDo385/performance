@@ -1,4 +1,4 @@
-.PHONY: default build-go build-ts build-cpp build-rust run-go run-python run-ts run-cpp run-rust benchmark test clean install-deps
+.PHONY: default build-go build-ts build-c build-cpp build-rust run-go run-python run-ts run-c run-cpp run-rust benchmark test clean install-deps
 
 default: benchmark
 
@@ -10,6 +10,9 @@ build-go:
 
 build-ts: install-deps
 	cd typescript && npm run build
+
+build-c:
+	clang -O3 -pthread -o bench-c c/src/bench.c
 
 build-cpp:
 	clang++ -O3 -std=c++17 -pthread -o bench-cpp cpp/src/bench.cpp
@@ -26,13 +29,16 @@ run-python:
 run-ts: build-ts
 	cd typescript && node dist/bench.js --limit=500000 > ../ts_output.txt
 
+run-c: build-c
+	./bench-c --limit=500000 > c_output.txt
+
 run-cpp: build-cpp
 	./bench-cpp --limit=500000 > cpp_output.txt
 
 run-rust: build-rust
 	./bench-rust --limit=500000 > rust_output.txt
 
-benchmark: run-go run-python run-ts run-cpp run-rust
+benchmark: run-go run-python run-ts run-c run-cpp run-rust
 	./run_bench.sh
 
 test: benchmark
@@ -40,6 +46,6 @@ test: benchmark
 	./tests/validate_output.sh
 
 clean:
-	rm -f bench-go bench-cpp bench-rust go_output.txt python_output.txt ts_output.txt cpp_output.txt rust_output.txt
+	rm -f bench-go bench-c bench-cpp bench-rust go_output.txt python_output.txt ts_output.txt c_output.txt cpp_output.txt rust_output.txt
 	rm -rf typescript/dist typescript/node_modules
 	rm -rf rust/target
