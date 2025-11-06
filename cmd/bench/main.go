@@ -13,7 +13,6 @@ import (
 func main() {
 	// Parse command-line arguments
 	limit := flag.Int("limit", 100000, "Count primes up to this limit")
-	fibLimit := flag.Int("fib", 35, "Fibonacci sequence limit")
 	flag.Parse()
 
 	// Print CPU info
@@ -35,9 +34,9 @@ func main() {
 	stopCPU := make(chan struct{})
 	go cpuWorkload.StartCPUReporter(stopCPU)
 
-	// Run complex benchmark
+	// Run intensive parallel benchmark with per-core tracking
 	startTime := time.Now()
-	results := compute.ComplexCompute(*limit, *fibLimit, numCores)
+	intensiveResults := compute.IntensiveBenchmark(*limit, numCores)
 	elapsed := time.Since(startTime)
 
 	// Stop CPU monitoring
@@ -50,17 +49,14 @@ func main() {
 	peakMem := memTracker.GetPeak()
 	startMem := memTracker.GetStart()
 
-	// Get CPU workload distribution
-	workDist, totalWork := cpuWorkload.GetWorkDistribution()
+	// Get CPU utilization
 	avgUtil := cpuWorkload.GetAverageUtilization()
 
 	// Print structured output
-	fmt.Println("--- Go Benchmark ---")
+	fmt.Println("--- Go Benchmark (Token Generation via Puzzle Solving) ---")
 	fmt.Printf("Cores Used: %d\n", numCores)
-	fmt.Printf("Primes Counted To: %d\n", *limit)
-	fmt.Printf("Fibonacci Limit: %d\n", *fibLimit)
-	fmt.Printf("Primes Found: %d\n", results["primes"])
-	fmt.Printf("Fibonacci Sum: %d\n", results["fibonacci"])
+	fmt.Printf("Puzzle Iterations: %d\n", *limit)
+	fmt.Printf("Total Tokens Generated: %d\n", intensiveResults.TotalTokens)
 	fmt.Printf("Time Elapsed: %.2fs\n", elapsed.Seconds())
 	fmt.Printf("Memory Start: %.2f MB\n", startMem.AllocMB)
 	fmt.Printf("Memory Peak: %.2f MB\n", peakMem.AllocMB)
@@ -68,20 +64,17 @@ func main() {
 	fmt.Printf("Total System Memory: %.2f GB\n", startMem.TotalGB)
 	fmt.Printf("System Memory Usage: %.1f%%\n", startMem.UsagePercent)
 
-	// Print per-core distribution
-	fmt.Println("\nPer-Core Workload Distribution:")
-	avgWorkPerCore := float64(totalWork) / float64(numCores)
-	for i, work := range workDist {
-		percentage := 0.0
-		if totalWork > 0 {
-			percentage = (float64(work) / float64(totalWork)) * 100
+	// Print per-core breakdown
+	fmt.Println("\nPer-Core Puzzle Results:")
+	for _, coreResult := range intensiveResults.Cores {
+		fmt.Printf("  Core %d:\n", coreResult.CoreID)
+		fmt.Printf("    Tokens Generated: %d\n", coreResult.TokensGenerated)
+		fmt.Printf("    Lattice Paths: %d\n", coreResult.LatticePaths)
+		fmt.Printf("    Knapsack Solutions: %d\n", coreResult.KnapsackSolutions)
+		if len(avgUtil) > coreResult.CoreID {
+			fmt.Printf("    Avg Utilization: %.1f%%\n", avgUtil[coreResult.CoreID])
 		}
-		utilization := 0.0
-		if i < len(avgUtil) {
-			utilization = avgUtil[i]
-		}
-		fmt.Printf("  Core %d: %d units (%.1f%%) | Avg Utilization: %.1f%%\n",
-			i, work, percentage, utilization)
 	}
-	fmt.Printf("  Average Work per Core: %.0f units\n", avgWorkPerCore)
+	fmt.Printf("  Total: %d tokens across %d cores\n", intensiveResults.TotalTokens, numCores)
+	fmt.Printf("  Average Tokens per Core: %.0f\n", float64(intensiveResults.TotalTokens)/float64(numCores))
 }

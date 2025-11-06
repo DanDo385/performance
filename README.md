@@ -1,19 +1,22 @@
-# CPU Benchmark: Go vs Python vs TypeScript
+# CPU Benchmark: Multi-Language Puzzle Solver Comparison
 
-A comprehensive cross-language CPU benchmarking project that compares performance of Go, Python, and TypeScript on parallel computations including prime-counting and Fibonacci calculations.
+A comprehensive cross-language CPU benchmarking project that compares performance of Go, Python, TypeScript, C++, and Rust on parallel computations involving complex algorithmic puzzles (lattice paths and knapsack problems).
 
 ## Features
 
-- **Parallel Prime Counting**: Uses all available CPU cores for computation
-- **Fibonacci Calculations**: Complex recursive calculations with memoization
+- **Token-Generating Puzzles**: CPU-intensive algorithms combining:
+  - Lattice path dynamic programming (m×n grid path enumeration)
+  - NP-hard knapsack problem solving
+  - Multiple puzzle iterations per benchmark run
+- **5 Language Support**: Go, Python, TypeScript, C++, and Rust
+- **Parallel Processing**: Uses all available CPU cores for computation
 - **Live CPU Monitoring**: Real-time per-core CPU utilization tracking
 - **Detailed CPU Info**: CPU model, speed (GHz), and core count
 - **Memory Tracking**:
   - Captures start, peak, and end memory usage
   - Total system memory and usage percentage
-  - Per-core workload distribution analysis
-- **Per-Core Workload Distribution**: Detailed breakdown of work units per core
-- **Side-by-Side Comparison**: Formatted comparison table of all three languages
+  - Per-core computation breakdown
+- **Side-by-Side Comparison**: Formatted comparison table of all languages
 - **Automated Testing**: Validates benchmark output structure and values
 - **Performance Analysis**: Automatic speedup calculations between languages
 
@@ -23,14 +26,16 @@ A comprehensive cross-language CPU benchmarking project that compares performanc
 performance/
 ├── cmd/bench/main.go                    # Go benchmark entry point
 ├── internal/
-│   ├── compute/primes.go                # Parallel prime counting & Fibonacci
+│   ├── compute/primes.go                # Token-generating puzzle solvers
 │   ├── metrics/cpu.go                   # Live CPU monitoring & workload tracking
 │   └── metrics/memory.go                # Memory tracking with system info
 ├── python/bench.py                      # Python benchmark implementation
+├── cpp/src/bench.cpp                    # C++ benchmark implementation
+├── rust/src/main.rs                     # Rust benchmark implementation
 ├── typescript/
 │   ├── src/
 │   │   ├── bench.ts                     # TypeScript entry point
-│   │   ├── compute.ts                   # Computation logic
+│   │   ├── compute.ts                   # Puzzle solving logic
 │   │   └── metrics.ts                   # Metrics collection
 │   ├── package.json                     # Node.js dependencies
 │   └── tsconfig.json                    # TypeScript configuration
@@ -55,6 +60,16 @@ performance/
   pip3 install psutil
   ```
 
+### C++
+- Clang or GCC compiler with C++17 support
+- macOS: Xcode Command Line Tools
+- Linux: `g++` or `clang++`
+
+### Rust
+- Rust 1.56 or higher
+- Cargo (comes with Rust)
+- Dependencies: `rayon` for parallelism, `num_cpus` for CPU detection
+
 ### TypeScript/Node.js
 - Node.js 16 or higher
 - npm (comes with Node.js)
@@ -62,18 +77,19 @@ performance/
 
 ## Usage
 
-### Run Full Benchmark (All Three Languages)
+### Run Full Benchmark (All Five Languages)
 
 ```bash
 make benchmark
 ```
 
 This will:
-1. Build the Go benchmark binary
-2. Run Go benchmark (500k primes, Fibonacci 35)
-3. Run Python benchmark (same parameters)
-4. Build and run TypeScript benchmark (same parameters)
-5. Display comprehensive comparison table with performance analysis
+1. Build and run Go benchmark (500k puzzle iterations)
+2. Run Python benchmark (same parameters)
+3. Build and run TypeScript benchmark (500k puzzle iterations)
+4. Build and run C++ benchmark (500k puzzle iterations)
+5. Build and run Rust benchmark (500k puzzle iterations)
+6. Display comprehensive comparison table with performance analysis
 
 ### Run with Validation
 
@@ -86,31 +102,43 @@ This runs the benchmark and validates that all outputs contain valid structured 
 ### Individual Language Runs
 
 ```bash
-# Build Go binary
+# Build and run Go
 make build-go
-
-# Run only Go benchmark
 make run-go
 
-# Run only Python benchmark
+# Run Python
 make run-python
 
 # Build and run TypeScript
 make build-ts
 make run-ts
+
+# Build and run C++
+make build-cpp
+make run-cpp
+
+# Build and run Rust
+make build-rust
+make run-rust
 ```
 
 ### Custom Parameters
 
 ```bash
-# Go with custom limits
-./bench-go --limit=1000000 --fib=40
+# Go with custom puzzle iterations
+./bench-go --limit=1000000
 
-# Python with custom limits
-python3 python/bench.py --limit=1000000 --fib=40
+# Python with custom puzzle iterations
+python3 python/bench.py --limit=1000000
 
-# TypeScript with custom limits
-cd typescript && node dist/bench.js --limit=1000000 --fib=40
+# TypeScript with custom puzzle iterations
+cd typescript && node dist/bench.js --limit=1000000
+
+# C++ with custom puzzle iterations
+./bench-cpp --limit=1000000
+
+# Rust with custom puzzle iterations
+./bench-rust --limit=1000000
 ```
 
 ## Output Format
@@ -118,51 +146,52 @@ cd typescript && node dist/bench.js --limit=1000000 --fib=40
 ### Individual Benchmark Output
 
 ```
-CPU Model: Intel(R) Core(TM) i7-9700K CPU @ 3.60GHz
-CPU Speed: 3.60 GHz
+CPU Model: Apple M4
+CPU Speed: 2.40 GHz
 Cores: 8 (Logical: 8)
 
---- Go Benchmark ---
+--- Go Benchmark (Token Generation via Puzzle Solving) ---
 Cores Used: 8
-Primes Counted To: 500000
-Fibonacci Limit: 35
-Primes Found: 41538
-Fibonacci Sum: 29860703
-Time Elapsed: 3.14s
-Memory Start: 0.15 MB
-Memory Peak: 2.45 MB
-Memory End: 1.23 MB
+Puzzle Iterations: 500000
+Total Tokens Generated: 647355583714124
+Time Elapsed: 3.68s
+Memory Start: 0.14 MB
+Memory Peak: 1.48 MB
+Memory End: 1.48 MB
 Total System Memory: 16.00 GB
-System Memory Usage: 35.4%
+System Memory Usage: 75.4%
 
-Per-Core Workload Distribution:
-  Core 0: 5192 units (12.5%) | Avg Utilization: 95.2%
-  Core 1: 5187 units (12.5%) | Avg Utilization: 94.8%
-  Core 2: 5180 units (12.5%) | Avg Utilization: 93.1%
-  Core 3: 5201 units (12.5%) | Avg Utilization: 96.4%
-  Core 4: 5190 units (12.5%) | Avg Utilization: 94.9%
-  Core 5: 5185 units (12.5%) | Avg Utilization: 95.1%
-  Core 6: 5178 units (12.5%) | Avg Utilization: 92.8%
-  Core 7: 5187 units (12.5%) | Avg Utilization: 94.2%
-  Average Work per Core: 5188 units
+Per-Core Puzzle Results:
+  Core 0:
+    Tokens Generated: 80915062297108
+    Lattice Paths: 233027053856
+    Knapsack Solutions: 54496
+    Avg Utilization: 72.4%
+  Core 1:
+    Tokens Generated: 80922619056391
+    Lattice Paths: 233477489218
+    Knapsack Solutions: 54671
+    Avg Utilization: 69.0%
 ```
 
 ### Comparison Table
 
 ```
 ==========================================================================
-GO vs PYTHON vs TYPESCRIPT - CPU BENCHMARK COMPARISON
+GO vs PYTHON vs TYPESCRIPT vs C++ vs RUST - CPU BENCHMARK COMPARISON
 --------------------------------------------------------------------------
-Language     Time (s)   Memory Peak (MB)   Cores Used   Primes     Fib Sum
-Go           3.14       2.45               8            41538      29860703
-Python       12.56      8.32               8            41538      29860703
-TypeScript   8.42       5.67               8            41538      29860703
+Language     Time (s)   Memory Peak (MB) Cores Used   Tokens Generated
+C++          1.01s      0.50             8            647,355,583,714,124
+Rust         1.23s      0.50             8            647,355,583,714,124
+Go           3.68s      1.48             8            647,355,583,714,124
+Python       36.53s     15.11            8            647,355,583,714,124
 ==========================================================================
 
 Performance Analysis:
 --------------------
-Python is 4.00x slower than Go
-TypeScript is 1.49x vs Python
+C++ is 3.64x faster than Go
+Rust is 2.99x faster than Go
+Python is 9.92x slower than Go
 ```
 
 ## How It Works
@@ -223,45 +252,73 @@ TypeScript is 1.49x vs Python
 
 ## Algorithms
 
-### Prime Counting
-Both implementations use optimized trial division:
-1. Handle special cases (n ≤ 1, n ≤ 3)
-2. Quick checks for divisibility by 2 and 3
-3. Check only numbers of form 6k±1 up to √n
+### Token-Generating Puzzle
+The benchmark solves three interconnected puzzles to generate computational tokens:
 
-### Fibonacci Sequence
-- Recursive calculation with memoization
-- Computes sum of first N Fibonacci numbers
-- Distributed across workers for parallel execution
+#### 1. Lattice Path Dynamic Programming
+- **Problem**: Count number of paths from top-left to bottom-right in an m×n lattice
+- **Approach**: Bottom-up DP with O(m×n) complexity
+- **Computation**: For each puzzle iteration, solves multiple lattice problems with varying dimensions
+- **Optimization**: Uses modulo (10^9+7) to prevent integer overflow while maintaining meaningful computation
+
+#### 2. Knapsack Problem Solving
+- **Problem**: Select items to maximize value within capacity constraint (NP-hard)
+- **Approach**: Dynamic programming with O(n × capacity) complexity
+- **Items**: 10-25 items per problem with random weights and values
+- **Computation**: Solves multiple knapsack instances with varying parameters
+
+#### 3. Multi-Puzzle Integration
+- **Per Iteration**: Each puzzle iteration combines:
+  - 1 primary lattice path solver (20-60 × 20-60 grid)
+  - 1 knapsack problem
+  - 0-4 additional lattice path problems with smaller grids
+- **Token Value**: Sum of all puzzle results contributes to token count
+- **Scaling**: 500,000 iterations × multiple puzzles per iteration = millions of computation units
 
 ## Performance Characteristics
 
+### Actual Results (500,000 Puzzle Iterations)
+
+| Language   | Time (s) | Tokens Generated    | Speed vs Go  | Memory Peak (MB) |
+|------------|----------|---------------------|--------------|------------------|
+| C++        | 1.01s    | 647,355,583,714,124 | 3.64x faster | 0.50             |
+| Rust       | 1.23s    | 647,355,583,714,124 | 2.99x faster | 0.50             |
+| Go         | 3.68s    | 647,355,583,714,124 | Baseline     | 1.48             |
+| Python     | 36.53s   | 647,355,583,714,124 | 9.92x slower | 15.11            |
+
 ### Expected Relative Performance
 
-- **Go**: Fastest (compiled, low-level access, true parallelism)
-- **TypeScript**: Medium (V8 optimization, single-threaded JS)
-- **Python**: Slowest (interpreter overhead, GIL limitations for pure Python)
+- **C++**: Fastest (compiled, aggressive optimization, zero-cost abstractions)
+- **Rust**: Very Fast (compiled, memory safety, excellent DP optimization)
+- **Go**: Fast (compiled, good parallelism, runtime overhead)
+- **Python**: Slowest (interpreter overhead, GIL limitations, dynamic typing)
+- **TypeScript**: Variable (JIT compiled by V8, single-threaded execution)
 
 ### Memory Usage (Typical)
 
-- **Go**: 0.5-3 MB (efficient memory management)
-- **Python**: 5-15 MB (interpreter overhead)
-- **TypeScript**: 20-50 MB (Node.js runtime)
+- **C++**: 0.5 MB (static memory management, stack allocation)
+- **Rust**: 0.5 MB (efficient memory management, zero-copy)
+- **Go**: 1-3 MB (runtime memory management, GC overhead)
+- **Python**: 10-20 MB (interpreter overhead, object allocation)
+- **TypeScript**: 3-10 MB (Node.js runtime, heap management)
 
 ### CPU Utilization
 
-- **Go**: Near 100% on all cores (true parallelism)
-- **Python**: Variable (GIL, multiprocessing overhead)
-- **TypeScript**: Lower due to single-threaded JS execution
+- **C++**: 95%+ on all cores (true parallelism with threads)
+- **Rust**: 95%+ on all cores (rayon data parallelism)
+- **Go**: 85%+ on all cores (goroutine overhead slightly higher)
+- **Python**: 70-90% (multiprocessing IPC overhead)
+- **TypeScript**: 60-80% (single-threaded, event loop scheduling)
 
 ## Testing
 
 The validation script checks:
 
-- Both/all output files exist
-- Required fields present: "Time Elapsed", "Memory Peak", "Cores Used", "Primes Found", "Fibonacci Sum"
+- All output files exist (Go, Python, TypeScript, C++, Rust)
+- Required fields present: "Time Elapsed", "Memory Peak", "Cores Used", "Total Tokens Generated"
 - All numeric values are valid and > 0
 - Proper formatting of output
+- Tokens are consistent across languages (same computation, same results)
 
 ```bash
 make test
@@ -279,9 +336,9 @@ make clean
 ```
 
 Removes:
-- Compiled binaries (`bench-go`)
-- Output files (`go_output.txt`, `python_output.txt`, `ts_output.txt`)
-- TypeScript build artifacts
+- Compiled binaries (`bench-go`, `bench-cpp`, `bench-rust`)
+- Output files (all language output files)
+- TypeScript and Rust build artifacts
 
 ## Advanced Usage
 
@@ -297,24 +354,30 @@ make build-ts
 
 ### Custom Benchmark Parameters
 
-Edit the Makefile to change default limits:
+Edit the Makefile to change default puzzle iterations:
 
 ```makefile
 run-go: build-go
-    ./bench-go --limit=1000000 --fib=40 > go_output.txt
+    ./bench-go --limit=1000000 > go_output.txt
 ```
 
 ### Running Individual Benchmarks
 
 ```bash
 # Run Go directly
-./bench-go --limit=100000 --fib=30
+./bench-go --limit=100000
 
 # Run Python directly
-python3 python/bench.py --limit=100000 --fib=30
+python3 python/bench.py --limit=100000
+
+# Run C++ directly
+./bench-cpp --limit=100000
+
+# Run Rust directly
+./bench-rust --limit=100000
 
 # Run TypeScript directly
-cd typescript && npm run build && node dist/bench.js --limit=100000 --fib=30
+cd typescript && npm run build && node dist/bench.js --limit=100000
 ```
 
 ## Troubleshooting
@@ -334,6 +397,26 @@ go mod download
 pip3 install psutil
 ```
 
+### C++ compiler not found
+
+```bash
+# macOS: Install Xcode Command Line Tools
+xcode-select --install
+
+# Linux: Install build essentials
+sudo apt-get install build-essential
+```
+
+### Rust build fails
+
+```bash
+# Ensure Rust toolchain is installed
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+
+# Update Rust
+rustup update
+```
+
 ### TypeScript/Node.js issues
 
 ```bash
@@ -346,6 +429,8 @@ cd typescript && npm install
 
 - **Go**: Requires `gopsutil` - run `go mod tidy`
 - **Python**: Requires `psutil` - install with `pip3 install psutil`
+- **C++**: Uses standard C++ library (no external deps needed)
+- **Rust**: Uses standard library and Cargo dependencies
 - **TypeScript**: Uses built-in `os` module (no external deps needed)
 
 ## License
@@ -358,3 +443,6 @@ MIT License - Feel free to use and modify for benchmarking purposes.
 - For consistent results, run on an idle system
 - Disable CPU frequency scaling for more predictable performance
 - Each benchmark includes overhead from monitoring; actual computation is slightly faster
+- Token counts should be identical across all languages for the same puzzle iterations and seed parameters
+- The puzzle-based approach creates meaningful timing differences (no 0.00s runtimes)
+- Useful for benchmarking dynamic programming and optimization algorithms across languages

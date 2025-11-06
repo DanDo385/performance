@@ -6,102 +6,82 @@ import os
 import platform
 import psutil
 import time
-from multiprocessing import Pool, cpu_count
+from multiprocessing import Pool, cpu_count, Manager
+from dataclasses import dataclass
 
 
-def is_prime(n):
-    """Check if a number is prime using trial division"""
-    if n <= 1:
-        return False
-    if n <= 3:
-        return True
-    if n % 2 == 0 or n % 3 == 0:
-        return False
-
-    limit = int(math.sqrt(n))
-    i = 5
-    while i <= limit:
-        if n % i == 0 or n % (i + 2) == 0:
-            return False
-        i += 6
-    return True
-
-
-def count_primes_in_range(args):
-    """Count primes in the range [start, end)"""
-    start, end = args
-    count = 0
-    for i in range(start, end):
-        if is_prime(i):
-            count += 1
-    return count
-
-
-def fib(n, memo=None):
-    """Compute nth Fibonacci number with memoization"""
-    if memo is None:
-        memo = {}
-
-    if n <= 1:
-        return n
-    if n in memo:
-        return memo[n]
-
-    result = fib(n - 1, memo) + fib(n - 2, memo)
-    memo[n] = result
-    return result
-
-
-def compute_fibonacci_range(args):
-    """Compute Fibonacci sum for a range of values"""
-    start, end = args
-    memo = {}
-    total = 0
-    for i in range(start, end):
-        total += fib(i, memo)
-    return total
-
-
-def count_primes_parallel(limit, num_workers):
-    """Count primes up to limit using parallel workers"""
-    if limit <= 0:
+def solve_lattice_paths(m, n):
+    """Compute the number of paths in an m x n lattice using DP"""
+    if m == 0 or n == 0:
         return 0
 
-    chunk_size = limit // num_workers
-    ranges = []
+    # Limit dimensions to avoid overflow
+    m = min(m, 50)
+    n = min(n, 50)
 
-    for i in range(num_workers):
-        start = i * chunk_size
-        end = start + chunk_size
-        # Last worker handles remainder
-        if i == num_workers - 1:
-            end = limit
-        ranges.append((start, end))
+    MOD = 1000000007  # Use modulo to prevent overflow
 
-    with Pool(processes=num_workers) as pool:
-        results = pool.map(count_primes_in_range, ranges)
+    # DP table for lattice paths
+    dp = [[0] * (n + 1) for _ in range(m + 1)]
+    for i in range(m + 1):
+        dp[i][0] = 1
+    for j in range(n + 1):
+        dp[0][j] = 1
 
-    return sum(results)
+    for i in range(1, m + 1):
+        for j in range(1, n + 1):
+            dp[i][j] = (dp[i - 1][j] + dp[i][j - 1]) % MOD
+
+    return dp[m][n]
 
 
-def compute_fibonacci_series(num_fib, num_workers):
-    """Compute Fibonacci series sum using parallel workers"""
-    if num_fib <= 0:
+def solve_knapsack(capacity, weights, values):
+    """Solve the knapsack problem (NP-hard, CPU intensive)"""
+    n = len(weights)
+    if n == 0 or capacity <= 0:
         return 0
 
-    chunk_size = (num_fib + num_workers - 1) // num_workers
-    ranges = []
+    # Limit size to keep computation reasonable
+    n = min(n, 25)
+    weights = weights[:n]
+    values = values[:n]
 
-    for i in range(num_workers):
-        start = i * chunk_size
-        end = min(start + chunk_size, num_fib)
-        if start < num_fib:
-            ranges.append((start, end))
+    # DP table
+    dp = [[0] * (capacity + 1) for _ in range(n + 1)]
 
-    with Pool(processes=num_workers) as pool:
-        results = pool.map(compute_fibonacci_range, ranges)
+    for i in range(1, n + 1):
+        for w in range(capacity + 1):
+            if weights[i - 1] <= w:
+                new_val = dp[i - 1][w - weights[i - 1]] + values[i - 1]
+                dp[i][w] = max(new_val, dp[i - 1][w])
+            else:
+                dp[i][w] = dp[i - 1][w]
 
-    return sum(results)
+    return dp[n][capacity]
+
+
+def token_generating_puzzle(puzzle_id, size):
+    """Solve a computational puzzle for tokens"""
+    tokens = 0
+
+    # Puzzle 1: Lattice path computation
+    lattice_size = (size % 40) + 20
+    tokens += solve_lattice_paths(lattice_size, lattice_size)
+
+    # Puzzle 2: Knapsack problems
+    capacity = (size % 50) + 30
+    num_items = (size % 15) + 10
+    weights = [(size + i * 7 + 1) % 100 for i in range(num_items)]
+    values = [(size + i * 13 + 2) % 100 for i in range(num_items)]
+
+    tokens += solve_knapsack(capacity, weights, values)
+
+    # Puzzle 3: Additional lattice paths with different sizes
+    for i in range(size % 5):
+        path_size = ((size + i) % 30) + 15
+        tokens += solve_lattice_paths(path_size, path_size // 2)
+
+    return tokens
 
 
 def get_cpu_info():
@@ -143,12 +123,65 @@ def print_cpu_info(info):
     print(f"Cores: {info['cores']} (Logical: {info['cores']})")
 
 
+@dataclass
+class CoreResult:
+    core_id: int
+    tokens_generated: int
+    lattice_paths: int
+    knapsack_solutions: int
+
+
+def intensive_compute_per_core(args):
+    """Perform token-generating puzzle computations per core"""
+    limit, num_workers, core_id = args
+
+    core_result = CoreResult(
+        core_id=core_id,
+        tokens_generated=0,
+        lattice_paths=0,
+        knapsack_solutions=0
+    )
+
+    chunk_size = limit // num_workers
+    start = core_id * chunk_size
+    end = start + chunk_size
+    if core_id == num_workers - 1:
+        end = limit
+
+    # Process each item, solving puzzles to generate tokens
+    for i in range(start, end):
+        tokens = token_generating_puzzle(i, i)
+        core_result.tokens_generated += tokens
+
+        # Track lattice paths and knapsack solutions
+        if i % 100 == 0:
+            core_result.lattice_paths += solve_lattice_paths((i % 30) + 15, (i % 30) + 15)
+
+        if i % 150 == 0 and i > 0:
+            capacity = (i % 50) + 30
+            weights = [((i * 7 + j * 11) % 100) for j in range(15)]
+            values = [((i * 13 + j * 17) % 100) for j in range(15)]
+            core_result.knapsack_solutions += solve_knapsack(capacity, weights, values)
+
+    return core_result
+
+
+def intensive_benchmark(limit, num_workers):
+    """Run token-generating puzzle computation with per-core breakdown"""
+    tasks = [(limit, num_workers, i) for i in range(num_workers)]
+
+    with Pool(processes=num_workers) as pool:
+        core_results = pool.map(intensive_compute_per_core, tasks)
+
+    total_tokens = sum(cr.tokens_generated for cr in core_results)
+
+    return core_results, total_tokens
+
+
 def main():
     parser = argparse.ArgumentParser(description='Python CPU Benchmark')
     parser.add_argument('--limit', type=int, default=100000,
-                        help='Count primes up to this limit')
-    parser.add_argument('--fib', type=int, default=35,
-                        help='Fibonacci limit')
+                        help='Number of puzzle iterations')
     args = parser.parse_args()
 
     # Print CPU info
@@ -164,13 +197,9 @@ def main():
     mem_start = get_memory_info(process)
     mem_peak_rss = mem_start['rss_mb']
 
-    # Run benchmark
+    # Run intensive benchmark
     start_time = time.time()
-
-    # Compute both primes and fibonacci in sequence (no true parallelism between them)
-    prime_count = count_primes_parallel(args.limit, num_cores)
-    fib_sum = compute_fibonacci_series(args.fib, num_cores)
-
+    core_results, total_tokens = intensive_benchmark(args.limit, num_cores)
     elapsed = time.time() - start_time
 
     # Track peak memory
@@ -178,12 +207,10 @@ def main():
     mem_peak_rss = max(mem_peak_rss, mem_end['rss_mb'])
 
     # Print structured output
-    print("--- Python Benchmark ---")
+    print("--- Python Benchmark (Token Generation via Puzzle Solving) ---")
     print(f"Cores Used: {num_cores}")
-    print(f"Primes Counted To: {args.limit}")
-    print(f"Fibonacci Limit: {args.fib}")
-    print(f"Primes Found: {prime_count}")
-    print(f"Fibonacci Sum: {fib_sum}")
+    print(f"Puzzle Iterations: {args.limit}")
+    print(f"Total Tokens Generated: {total_tokens}")
     print(f"Time Elapsed: {elapsed:.2f}s")
     print(f"Memory Start: {mem_start['rss_mb']:.2f} MB")
     print(f"Memory Peak: {mem_peak_rss:.2f} MB")
@@ -191,14 +218,15 @@ def main():
     print(f"Total System Memory: {mem_start['total_gb']:.2f} GB")
     print(f"System Memory Usage: {mem_start['percent_system']:.1f}%")
 
-    # Per-core distribution (Python doesn't expose this easily in multiprocessing)
-    print("\nPer-Core Workload Distribution:")
-    avg_work_per_core = (prime_count + fib_sum) / num_cores
-    for i in range(num_cores):
-        # Estimate even distribution
-        percentage = 100.0 / num_cores
-        print(f"  Core {i}: {int(avg_work_per_core)} units ({percentage:.1f}%) | Avg Utilization: N/A")
-    print(f"  Average Work per Core: {int(avg_work_per_core)} units")
+    # Print per-core puzzle results
+    print("\nPer-Core Puzzle Results:")
+    for core_res in core_results:
+        print(f"  Core {core_res.core_id}:")
+        print(f"    Tokens Generated: {core_res.tokens_generated}")
+        print(f"    Lattice Paths: {core_res.lattice_paths}")
+        print(f"    Knapsack Solutions: {core_res.knapsack_solutions}")
+    print(f"  Total: {total_tokens} tokens across {num_cores} cores")
+    print(f"  Average Tokens per Core: {total_tokens // num_cores}")
 
 
 if __name__ == '__main__':

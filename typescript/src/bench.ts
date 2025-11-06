@@ -10,25 +10,21 @@ import {
   printMemoryStats,
 } from './metrics';
 
-async function parseArgs(): Promise<{ limit: number; fib: number }> {
+async function parseArgs(): Promise<{ limit: number }> {
   let limit = 100000;
-  let fib = 35;
 
   for (let i = 2; i < process.argv.length; i++) {
     if (process.argv[i] === '--limit' && i + 1 < process.argv.length) {
       limit = parseInt(process.argv[i + 1], 10);
       i++;
-    } else if (process.argv[i] === '--fib' && i + 1 < process.argv.length) {
-      fib = parseInt(process.argv[i + 1], 10);
-      i++;
     }
   }
 
-  return { limit, fib };
+  return { limit };
 }
 
 async function main(): Promise<void> {
-  const { limit, fib } = await parseArgs();
+  const { limit } = await parseArgs();
 
   // Print CPU info
   printCPUInfo();
@@ -47,7 +43,7 @@ async function main(): Promise<void> {
 
   // Run benchmark
   const startTime = Date.now();
-  const results = await complexCompute(limit, fib, numCores);
+  const results = await complexCompute(limit, numCores);
   const elapsed = (Date.now() - startTime) / 1000;
 
   // Stop CPU monitoring
@@ -64,12 +60,10 @@ async function main(): Promise<void> {
   const avgUtil = cpuMonitor.getAverageUtilization();
 
   // Print structured output
-  console.log('--- TypeScript Benchmark ---');
+  console.log('--- TypeScript Benchmark (Token Generation via Puzzle Solving) ---');
   console.log(`Cores Used: ${numCores}`);
-  console.log(`Primes Counted To: ${limit}`);
-  console.log(`Fibonacci Limit: ${fib}`);
-  console.log(`Primes Found: ${results.primes}`);
-  console.log(`Fibonacci Sum: ${results.fibonacci}`);
+  console.log(`Puzzle Iterations: ${limit}`);
+  console.log(`Total Tokens Generated: ${results.tokensGenerated}`);
   console.log(`Time Elapsed: ${elapsed.toFixed(2)}s`);
   console.log(`Memory Start: ${startMem.heapUsedMB.toFixed(2)} MB`);
   console.log(`Memory Peak: ${peakMem.heapUsedMB.toFixed(2)} MB`);
@@ -77,18 +71,12 @@ async function main(): Promise<void> {
   console.log(`Total System Memory: ${startMem.totalGB.toFixed(2)} GB`);
   console.log(`System Memory Usage: ${startMem.usagePercent.toFixed(1)}%`);
 
-  // Print per-core distribution
-  console.log('\nPer-Core Workload Distribution:');
-  const avgWorkPerCore = totalWork / numCores;
-  for (let i = 0; i < numCores; i++) {
-    const work = workDist[i] || 0;
-    const percentage = totalWork > 0 ? (work / totalWork) * 100 : 0;
-    const utilization = avgUtil[i] || 0;
-    console.log(
-      `  Core ${i}: ${work} units (${percentage.toFixed(1)}%) | Avg Utilization: ${utilization.toFixed(1)}%`
-    );
-  }
-  console.log(`  Average Work per Core: ${avgWorkPerCore.toFixed(0)} units`);
+  // Print per-core puzzle results
+  console.log('\nPer-Core Puzzle Results:');
+  console.log(`  Lattice Paths Computed: ${results.latticePaths}`);
+  console.log(`  Knapsack Solutions: ${results.knapsackSolutions}`);
+  console.log(`  Total Tokens: ${results.tokensGenerated}`);
+  console.log(`  Average Tokens per Core: ${Math.floor(results.tokensGenerated / numCores)}`);
 }
 
 main().catch(console.error);

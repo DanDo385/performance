@@ -1,3 +1,10 @@
 *_output.txt
 bench-go
+bench-cpp
+bench-rust
 *.sum
+node_modules/
+typescript/dist/
+typescript/node_modules/
+rust/target/
+cpp/build/
