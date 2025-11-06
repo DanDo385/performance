@@ -53,18 +53,31 @@ echo ""
 # Check if output files exist
 check_file_exists "go_output.txt" || exit 1
 check_file_exists "python_output.txt" || exit 1
+check_file_exists "ts_output.txt" || exit 1
 
 # Validate Go output
 echo "Checking Go output..."
 check_field "go_output.txt" "Time Elapsed:" '^[0-9]+\.?[0-9]*$'
 check_field "go_output.txt" "Memory Peak:" '^[0-9]+\.?[0-9]*$'
 check_field "go_output.txt" "Cores Used:" '^[0-9]+$'
+check_field "go_output.txt" "Primes Found:" '^[0-9]+$'
+check_field "go_output.txt" "Fibonacci Sum:" '^[0-9]+$'
 
 # Validate Python output
 echo "Checking Python output..."
 check_field "python_output.txt" "Time Elapsed:" '^[0-9]+\.?[0-9]*$'
 check_field "python_output.txt" "Memory Peak:" '^[0-9]+\.?[0-9]*$'
 check_field "python_output.txt" "Cores Used:" '^[0-9]+$'
+check_field "python_output.txt" "Primes Found:" '^[0-9]+$'
+check_field "python_output.txt" "Fibonacci Sum:" '^[0-9]+$'
+
+# Validate TypeScript output
+echo "Checking TypeScript output..."
+check_field "ts_output.txt" "Time Elapsed:" '^[0-9]+\.?[0-9]*$'
+check_field "ts_output.txt" "Memory Peak:" '^[0-9]+\.?[0-9]*$'
+check_field "ts_output.txt" "Cores Used:" '^[0-9]+$'
+check_field "ts_output.txt" "Primes Found:" '^[0-9]+$'
+check_field "ts_output.txt" "Fibonacci Sum:" '^[0-9]+$'
 
 echo ""
 if [ $ERRORS -eq 0 ]; then

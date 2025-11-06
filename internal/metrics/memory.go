@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"runtime"
 	"sync"
+
+	"github.com/shirou/gopsutil/v3/mem"
 )
 
 // MemoryStats holds memory usage information
@@ -13,6 +15,8 @@ type MemoryStats struct {
 	SysMB        float64
 	HeapAllocMB  float64
 	HeapInuseMB  float64
+	UsagePercent float64
+	TotalGB      float64
 }
 
 // MemoryTracker tracks memory usage over time
@@ -33,12 +37,23 @@ func getMemoryStats() MemoryStats {
 	var m runtime.MemStats
 	runtime.ReadMemStats(&m)
 
+	// Get system memory info
+	v, err := mem.VirtualMemory()
+	totalGB := 0.0
+	usagePercent := 0.0
+	if err == nil {
+		totalGB = float64(v.Total) / 1024 / 1024 / 1024
+		usagePercent = v.UsedPercent
+	}
+
 	return MemoryStats{
 		AllocMB:      float64(m.Alloc) / 1024 / 1024,
 		TotalAllocMB: float64(m.TotalAlloc) / 1024 / 1024,
 		SysMB:        float64(m.Sys) / 1024 / 1024,
 		HeapAllocMB:  float64(m.HeapAlloc) / 1024 / 1024,
 		HeapInuseMB:  float64(m.HeapInuse) / 1024 / 1024,
+		UsagePercent: usagePercent,
+		TotalGB:      totalGB,
 	}
 }
 
@@ -98,4 +113,7 @@ func PrintMemorySnapshot(label string) {
 	fmt.Printf("  Sys: %.2f MB\n", stats.SysMB)
 	fmt.Printf("  HeapAlloc: %.2f MB\n", stats.HeapAllocMB)
 	fmt.Printf("  HeapInuse: %.2f MB\n", stats.HeapInuseMB)
+	if stats.TotalGB > 0 {
+		fmt.Printf("  System Memory: %.2f / %.2f GB (%.1f%%)\n", stats.AllocMB/1024, stats.TotalGB, stats.UsagePercent)
+	}
 }
