@@ -19,12 +19,18 @@ A comprehensive cross-language CPU benchmarking project that compares performanc
 - **Side-by-Side Comparison**: Formatted comparison table of all languages
 - **Automated Testing**: Validates benchmark output structure and values
 - **Performance Analysis**: Automatic speedup calculations between languages
+- **CPU Monitoring**: Real-time per-core CPU utilization tracking (`make cpu`)
+- **Memory Reporting**: Detailed system memory information (`make memory`)
+- **Cross-Platform**: Works on macOS and Linux (uses `gopsutil` for cross-platform compatibility)
 
 ## Project Structure
 
 ```
 performance/
-├── cmd/bench/main.go                    # Go benchmark entry point
+├── cmd/
+│   ├── bench/main.go                    # Go benchmark entry point
+│   ├── cpu-monitor/main.go              # CPU monitoring tool (make cpu)
+│   └── memory-report/main.go            # Memory reporting tool (make memory)
 ├── internal/
 │   ├── compute/primes.go                # Token-generating puzzle solvers
 │   ├── metrics/cpu.go                   # Live CPU monitoring & workload tracking
@@ -105,6 +111,88 @@ make test
 ```
 
 This runs the benchmark and validates that all outputs contain valid structured data with proper numeric values.
+
+### CPU Monitoring (`make cpu`)
+
+Run detailed per-core CPU monitoring while the benchmark executes:
+
+```bash
+make cpu
+```
+
+This command:
+- Builds the Go benchmark executable and CPU monitor tool
+- Runs the benchmark with real-time CPU monitoring
+- Displays live per-core CPU utilization (updates every 250ms)
+- Shows total system CPU percentage
+- Provides a summary with average utilization per core after completion
+
+**Example Output:**
+```
+==========================================================================
+DETAILED CPU MONITORING - PER-CORE BREAKDOWN
+==========================================================================
+Core Count: 8 logical cores
+
+Starting benchmark...
+
+CPU Load: Total 85.3% | Core 0: 87.2% | Core 1: 89.1% | Core 2: 83.4% | Core 3: 81.5% | Core 4: 88.7% | Core 5: 86.2% | Core 6: 84.9% | Core 7: 85.8%
+
+==========================================================================
+CPU MONITORING SUMMARY
+==========================================================================
+Core Count:           8 logical cores
+Total System CPU:     85.23% (average over run duration)
+
+Per-Core Average Utilization:
+  Core 0:              87.45%
+  Core 1:              89.12%
+  Core 2:              83.67%
+  Core 3:              81.34%
+  Core 4:              88.92%
+  Core 5:              86.18%
+  Core 6:              84.76%
+  Core 7:              85.89%
+==========================================================================
+```
+
+### Memory Report (`make memory`)
+
+Display detailed system memory information without running the benchmark:
+
+```bash
+make memory
+```
+
+This command shows:
+- Total system RAM
+- Available RAM
+- Used RAM
+- Free RAM
+- Memory utilization percentage
+- Swap usage (if available)
+- RAM speed (if retrievable)
+
+**Example Output:**
+```
+==========================================================================
+DETAILED SYSTEM MEMORY REPORT
+==========================================================================
+
+Total RAM:           16.00 GB  (17179869184 bytes)
+Available RAM:        4.50 GB  (4831838208 bytes)
+Used RAM:            11.50 GB  (12348030976 bytes)
+Free RAM:             4.50 GB  (4831838208 bytes)
+Memory Usage:        71.88%
+
+Swap Total:           2.00 GB  (2147483648 bytes)
+Swap Used:            0.50 GB  (536870912 bytes)
+Swap Free:            1.50 GB  (1610612736 bytes)
+Swap Usage:           25.00%
+
+RAM Speed:            Not available (platform limitation)
+==========================================================================
+```
 
 ### Individual Language Runs
 

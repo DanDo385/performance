@@ -1,4 +1,4 @@
-.PHONY: default build-go build-ts build-c build-cpp build-rust run-go run-python run-ts run-c run-cpp run-rust benchmark test clean install-deps
+.PHONY: default build-go build-ts build-c build-cpp build-rust build-cpu-monitor build-memory-report run-go run-python run-ts run-c run-cpp run-rust benchmark test clean install-deps cpu memory
 
 default: benchmark
 
@@ -19,6 +19,12 @@ build-cpp:
 
 build-rust:
 	cd rust && cargo build --release && cp target/release/bench ../bench-rust
+
+build-cpu-monitor:
+	go build -o cpu-monitor ./cmd/cpu-monitor
+
+build-memory-report:
+	go build -o memory-report ./cmd/memory-report
 
 run-go: build-go
 	./bench-go --limit=500000 > go_output.txt
@@ -45,7 +51,13 @@ test: benchmark
 	chmod +x tests/validate_output.sh
 	./tests/validate_output.sh
 
+cpu: build-cpu-monitor build-go
+	./cpu-monitor
+
+memory: build-memory-report
+	./memory-report
+
 clean:
-	rm -f bench-go bench-c bench-cpp bench-rust go_output.txt python_output.txt ts_output.txt c_output.txt cpp_output.txt rust_output.txt
+	rm -f bench-go bench-c bench-cpp bench-rust cpu-monitor memory-report go_output.txt python_output.txt ts_output.txt c_output.txt cpp_output.txt rust_output.txt
 	rm -rf typescript/dist typescript/node_modules
 	rm -rf rust/target
