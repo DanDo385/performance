@@ -97,7 +97,7 @@ export class CPUMonitor {
     const cpus = os.cpus();
     let lastCpuInfo = cpus.map((cpu) => ({
       user: cpu.times.user,
-      system: cpu.times.system,
+      sys: cpu.times.sys,
       idle: cpu.times.idle,
     }));
 
@@ -105,7 +105,7 @@ export class CPUMonitor {
       const cpus = os.cpus();
       const currentCpuInfo = cpus.map((cpu) => ({
         user: cpu.times.user,
-        system: cpu.times.system,
+        sys: cpu.times.sys,
         idle: cpu.times.idle,
       }));
 
@@ -115,11 +115,11 @@ export class CPUMonitor {
         const currentCpu = currentCpuInfo[i];
 
         const userDiff = currentCpu.user - lastCpu.user;
-        const systemDiff = currentCpu.system - lastCpu.system;
+        const sysDiff = currentCpu.sys - lastCpu.sys;
         const idleDiff = currentCpu.idle - lastCpu.idle;
-        const total = userDiff + systemDiff + idleDiff;
+        const total = userDiff + sysDiff + idleDiff;
 
-        const utilization = total === 0 ? 0 : ((userDiff + systemDiff) / total) * 100;
+        const utilization = total === 0 ? 0 : ((userDiff + sysDiff) / total) * 100;
         this.coreUtilization[i] = utilization;
         output += `Core ${i}: ${Math.round(utilization)}% `;
       }
